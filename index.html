@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Gayatri Sawant | Software Engineer</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#050508;--surface:#0f0f18;--card:#13131f;--purple:#7c3aed;--purple-light:#a855f7;--pink:#ec4899;--cyan:#06b6d4;--text:#fff;--muted:#94a3b8;--border:#1e1e30;}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+.page{display:none;min-height:100vh;}
+.page.active{display:flex;}
+
+/* CANVAS BG */
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0.4;}
+
+/* SIDE NAV */
+.sidenav{position:fixed;right:20px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:10px;}
+.snbtn{width:44px;height:44px;border-radius:50%;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.3s;backdrop-filter:blur(10px);}
+.snbtn:hover,.snbtn.active{background:var(--purple);color:#fff;border-color:var(--purple);box-shadow:0 0 20px rgba(124,58,237,0.5);}
+
+/* HOME */
+#home{flex-direction:row;min-height:100vh;position:relative;z-index:1;}
+.home-left{width:40%;min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.home-left::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(6,182,212,0.08),rgba(236,72,153,0.1));z-index:0;}
+.home-left::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(124,58,237,0.3),transparent 70%);border-radius:50%;animation:glow 3s ease-in-out infinite alternate;}
+@keyframes glow{from{transform:translate(-50%,-50%) scale(1);}to{transform:translate(-50%,-50%) scale(1.2);}}
+.avatar-ring{position:relative;z-index:1;width:200px;height:200px;}
+.avatar-ring::before{content:'';position:absolute;inset:-4px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--cyan),var(--pink));animation:spin 4s linear infinite;}
+.avatar-inner{position:absolute;inset:4px;border-radius:50%;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;font-size:4.5rem;font-weight:900;color:rgba(124,58,237,0.6);overflow:hidden;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+.location-pill{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.4);color:var(--purple-light);font-size:0.72rem;padding:6px 16px;border-radius:999px;backdrop-filter:blur(10px);white-space:nowrap;z-index:2;}
+.grid-lines{position:absolute;inset:0;z-index:0;opacity:0.05;background-image:linear-gradient(var(--purple) 1px,transparent 1px),linear-gradient(90deg,var(--purple) 1px,transparent 1px);background-size:40px 40px;}
+
+.home-right{flex:1;display:flex;align-items:center;padding:4rem 5rem 4rem 3rem;position:relative;z-index:1;}
+.home-inner{max-width:600px;}
+.greeting{font-size:0.85rem;color:var(--cyan);font-weight:600;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.8rem;display:flex;align-items:center;gap:8px;}
+.greeting::before{content:'';display:inline-block;width:24px;height:2px;background:var(--cyan);}
+.home-name{font-size:clamp(2.5rem,4.5vw,4rem);font-weight:900;line-height:1.1;margin-bottom:0.5rem;background:linear-gradient(135deg,#fff 30%,var(--purple-light) 70%,var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.home-role{font-size:clamp(1.1rem,2vw,1.5rem);font-weight:700;color:var(--muted);margin-bottom:1.2rem;}
+.coop-badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(236,72,153,0.1));border:1px solid rgba(124,58,237,0.4);color:#fff;font-size:0.78rem;font-weight:600;padding:7px 16px;border-radius:999px;margin-bottom:1.5rem;animation:badgePulse 2.5s ease-in-out infinite;}
+@keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.4),0 0 15px rgba(124,58,237,0.2);}50%{box-shadow:0 0 0 8px rgba(124,58,237,0),0 0 25px rgba(124,58,237,0.4);}}
+.badge-dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:blink 1.5s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.home-desc{color:var(--muted);font-size:0.95rem;line-height:1.8;margin-bottom:2rem;max-width:480px;}
+.home-desc strong{color:#fff;}
+.stats-row{display:flex;gap:2rem;margin-bottom:2rem;}
+.stat-mini{text-align:center;}
+.stat-mini .num{font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,var(--purple-light),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-mini .lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+.divider-v{width:1px;background:var(--border);align-self:stretch;}
+.btn-row{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-main{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;padding:0.8rem 1.8rem;border-radius:999px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;text-decoration:none;border:none;box-shadow:0 4px 20px rgba(124,58,237,0.4);}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,0.6);}
+.btn-outline{display:inline-flex;align-items:center;gap:10px;background:transparent;border:1.5px solid rgba(124,58,237,0.5);color:#fff;padding:0.8rem 1.8rem;border-radius:999px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;text-decoration:none;backdrop-filter:blur(10px);}
+.btn-outline:hover{border-color:var(--purple);background:rgba(124,58,237,0.1);transform:translateY(-2px);}
+
+/* FOOTER */
+.footer{background:linear-gradient(135deg,rgba(124,58,237,0.9),rgba(109,40,217,0.9));padding:1rem;text-align:center;font-size:0.82rem;color:#fff;backdrop-filter:blur(10px);position:relative;z-index:1;}
+.footer-icons{display:flex;gap:10px;justify-content:center;margin-top:8px;}
+.footer-icon{width:32px;height:32px;background:rgba(0,0,0,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;cursor:pointer;text-decoration:none;transition:transform 0.2s;}
+.footer-icon:hover{transform:scale(1.2);}
+
+/* ABOUT */
+#about{flex-direction:column;padding:3rem 2rem 0;position:relative;z-index:1;}
+.section-title{font-size:2rem;font-weight:900;text-align:center;margin-bottom:0.5rem;}
+.section-title span{background:linear-gradient(135deg,var(--purple-light),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.section-sub{text-align:center;color:var(--muted);font-size:0.85rem;margin-bottom:2.5rem;}
+.about-container{max-width:900px;margin:0 auto;width:100%;}
+.personal-info{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+.personal-info h3{font-size:0.85rem;font-weight:700;margin-bottom:1rem;color:var(--purple-light);text-transform:uppercase;letter-spacing:0.1em;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
+.info-row{font-size:0.85rem;color:var(--muted);}
+.info-row strong{color:#fff;margin-left:4px;}
+.info-row a{color:var(--purple-light);text-decoration:none;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin:1.5rem 0;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem;text-align:center;transition:all 0.3s;}
+.stat-card:hover{border-color:var(--purple);transform:translateY(-4px);box-shadow:0 8px 24px rgba(124,58,237,0.2);}
+.stat-num{font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--purple-light),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.stat-line{width:28px;height:2px;background:linear-gradient(90deg,var(--purple),var(--cyan));margin:6px auto;}
+.stat-label{font-size:0.75rem;color:var(--muted);}
+.skills-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+.skills-title{font-size:0.85rem;font-weight:700;margin-bottom:1rem;color:var(--purple-light);text-transform:uppercase;letter-spacing:0.1em;}
+.skills-wrap{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.sk{border:1px solid rgba(124,58,237,0.3);color:var(--muted);font-size:0.78rem;padding:0.35rem 0.9rem;border-radius:6px;background:rgba(124,58,237,0.05);transition:all 0.2s;cursor:default;}
+.sk:hover{border-color:var(--purple-light);color:#fff;background:rgba(124,58,237,0.15);}
+.exp-title{font-size:0.85rem;font-weight:700;margin-bottom:1.2rem;color:var(--purple-light);text-transform:uppercase;letter-spacing:0.1em;}
+.timeline-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:3rem;}
+.titem{display:flex;gap:0.8rem;align-items:flex-start;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem;transition:all 0.3s;}
+.titem:hover{border-color:rgba(124,58,237,0.4);transform:translateY(-2px);}
+.ticon{width:32px;height:32px;min-width:32px;background:linear-gradient(135deg,var(--purple),#6d28d9);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.tdate{font-size:0.68rem;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:var(--purple-light);padding:2px 8px;border-radius:999px;margin-bottom:4px;display:inline-block;}
+.tjob{font-weight:700;font-size:0.88rem;margin-bottom:2px;}
+.tcomp{font-size:0.78rem;color:var(--muted);margin-bottom:3px;}
+.tstack{font-size:0.72rem;color:#64748b;}
+
+/* PROJECTS */
+#portfolio{flex-direction:column;padding:3rem 2rem 0;position:relative;z-index:1;}
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;max-width:1000px;margin:0 auto 1.5rem;}
+.pcard{border-radius:16px;overflow:hidden;cursor:pointer;aspect-ratio:4/3;position:relative;transition:all 0.3s;border:1px solid var(--border);}
+.pcard:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(124,58,237,0.3);border-color:rgba(124,58,237,0.5);}
+.pcard:hover .pcard-hover{opacity:1;}
+.pcard-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.5rem;}
+.pcard-emoji{font-size:2.5rem;}
+.pcard-name{font-size:0.82rem;font-weight:700;color:rgba(255,255,255,0.7);}
+.pcard-hover{position:absolute;inset:0;background:linear-gradient(135deg,rgba(124,58,237,0.92),rgba(109,40,217,0.88));display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;border-radius:16px;gap:0.5rem;padding:1rem;}
+.pcard-hover-title{color:#fff;font-size:1rem;font-weight:800;text-align:center;}
+.pcard-hover-tags{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;}
+.pcard-hover-tag{font-size:0.62rem;background:rgba(255,255,255,0.2);color:#fff;padding:2px 7px;border-radius:999px;}
+.featured-badge{position:absolute;top:10px;left:10px;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-size:0.62rem;font-weight:700;padding:3px 9px;border-radius:999px;z-index:10;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
+.modal-overlay.open{display:flex;}
+.modal{background:linear-gradient(135deg,#0f0f1a,#13131f);border:1px solid rgba(124,58,237,0.3);border-radius:20px;width:90%;max-width:500px;padding:2rem;position:relative;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(124,58,237,0.3);}
+.modal-close{position:absolute;top:1rem;right:1rem;width:30px;height:30px;background:rgba(124,58,237,0.2);border-radius:50%;border:1px solid rgba(124,58,237,0.3);cursor:pointer;font-size:14px;color:#fff;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--purple);}
+.modal-icon{width:60px;height:60px;background:linear-gradient(135deg,var(--purple),#6d28d9);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1rem;}
+.modal-title{color:#fff;font-size:1.2rem;font-weight:800;text-align:center;margin-bottom:0.3rem;}
+.modal-subtitle{text-align:center;color:var(--muted);font-size:0.8rem;margin-bottom:1rem;}
+.modal-tags{display:flex;flex-wrap:wrap;gap:0.4rem;justify-content:center;margin-bottom:1rem;}
+.modal-tag{font-size:0.7rem;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);color:var(--purple-light);padding:3px 9px;border-radius:999px;}
+.modal-desc{font-size:0.84rem;color:var(--muted);line-height:1.7;margin-bottom:1.2rem;}
+.modal-links{display:flex;gap:0.8rem;justify-content:center;flex-wrap:wrap;}
+.modal-link{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;padding:0.55rem 1.3rem;border-radius:999px;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;box-shadow:0 4px 15px rgba(124,58,237,0.3);}
+.modal-link:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(124,58,237,0.5);}
+.modal-link.outline{background:transparent;border:1.5px solid rgba(124,58,237,0.4);box-shadow:none;}
+.modal-link.outline:hover{background:rgba(124,58,237,0.1);}
+
+/* CONTACT */
+#contact{flex-direction:column;padding:3rem 2rem 0;position:relative;z-index:1;}
+.contact-container{max-width:680px;margin:0 auto;width:100%;}
+.contact-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:1.5rem;}
+.contact-sub{font-size:1rem;font-weight:700;margin-bottom:0.5rem;}
+.contact-desc{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;line-height:1.7;}
+.cinfo-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;}
+.cinfo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--purple),#6d28d9);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.cinfo-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.cinfo-val{font-size:0.88rem;font-weight:600;}
+.social-row{display:flex;gap:10px;margin-bottom:1.5rem;}
+.soc-btn{width:40px;height:40px;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;color:#fff;text-decoration:none;transition:all 0.2s;}
+.soc-btn:hover{background:var(--purple);transform:translateY(-2px);}
+.form-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.8rem;margin-bottom:0.8rem;}
+.form-input{background:rgba(124,58,237,0.05);border:1px solid var(--border);border-radius:10px;padding:0.75rem 1rem;color:#fff;font-size:0.85rem;width:100%;outline:none;transition:border-color 0.2s;}
+.form-input::placeholder{color:#374151;}
+.form-input:focus{border-color:rgba(124,58,237,0.5);background:rgba(124,58,237,0.08);}
+textarea.form-input{resize:vertical;min-height:110px;grid-column:1/-1;}
+.btn-send{display:inline-flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--purple),#6d28d9);border:none;color:#fff;padding:0.8rem 2rem;border-radius:999px;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.3s;margin-bottom:3rem;box-shadow:0 4px 20px rgba(124,58,237,0.4);}
+.btn-send:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,0.6);}
+</style>
+</head>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="sidenav">
+  <button class="snbtn active" onclick="showPage('home',this)" title="Home">🏠</button>
+  <button class="snbtn" onclick="showPage('about',this)" title="About">👤</button>
+  <button class="snbtn" onclick="showPage('portfolio',this)" title="Projects">📁</button>
+  <button class="snbtn" onclick="showPage('contact',this)" title="Contact">✉️</button>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div style="display:flex;flex-direction:column;width:100%;position:relative;z-index:1;">
+    <div style="display:flex;flex:1;min-height:calc(100vh - 60px);">
+      <div class="home-left">
+        <div class="grid-lines"></div>
+        <div class="avatar-ring">
+          <div class="avatar-inner">GS</div>
+        </div>
+        <div class="location-pill">📍 Boston, MA · Open to Relocation</div>
+      </div>
+      <div class="home-right">
+        <div class="home-inner">
+          <div class="greeting">Welcome to my Portfolio</div>
+          <div class="home-name">I'm Gayatri Sawant</div>
+          <div class="home-role">Full Stack & Cloud Engineer</div>
+          <div class="coop-badge"><span class="badge-dot"></span> Actively Seeking Co-op · May 2026 · Boston / Remote / Anywhere US</div>
+          <p class="home-desc">
+            <strong>MS Software Engineering @ Northeastern</strong> — I build production-grade full-stack apps with React, Node.js, Python & AWS. Promoted at Zidio in 4 months. Open to Full Stack, Backend, Cloud & SWE co-op roles.
+          </p>
+          <div class="stats-row">
+            <div class="stat-mini"><div class="num">2+</div><div class="lbl">Yrs Exp</div></div>
+            <div class="divider-v"></div>
+            <div class="stat-mini"><div class="num">6+</div><div class="lbl">Projects</div></div>
+            <div class="divider-v"></div>
+            <div class="stat-mini"><div class="num">3.55</div><div class="lbl">MS GPA</div></div>
+            <div class="divider-v"></div>
+            <div class="stat-mini"><div class="num">9.85</div><div class="lbl">BS GPA</div></div>
+          </div>
+          <div class="btn-row">
+            <a class="btn-main" onclick="showPage('portfolio',document.querySelectorAll('.snbtn')[2])">View Projects →</a>
+            <a class="btn-outline" href="mailto:sawant.g@northeastern.edu">Contact Me ✉</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">© 2026 Gayatri Sawant · MS Software Engineering @ Northeastern
+      <div class="footer-icons">
+        <a href="https://github.com/sawantgayatri19" target="_blank" class="footer-icon">⌥</a>
+        <a href="https://www.linkedin.com/in/gayatri-sawant-full-stack-developer/" target="_blank" class="footer-icon">in</a>
+        <a href="mailto:sawant.g@northeastern.edu" class="footer-icon">✉</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about" class="page" style="flex-direction:column;">
+  <div style="flex:1;padding:3rem 2rem;position:relative;z-index:1;">
+    <h2 class="section-title">About <span>Me</span></h2>
+    <p class="section-sub">Full Stack Engineer · Cloud Architect · MS @ Northeastern</p>
+    <div class="about-container">
+      <div class="personal-info">
+        <h3>Personal Info</h3>
+        <div class="info-grid">
+          <div class="info-row">Name : <strong>Gayatri Sawant</strong></div>
+          <div class="info-row">Location : <strong>Boston, MA, USA</strong></div>
+          <div class="info-row">Email : <strong>sawant.g@northeastern.edu</strong></div>
+          <div class="info-row">Status : <strong style="color:#4ade80;">● Open to Co-op</strong></div>
+          <div class="info-row">LinkedIn : <strong><a href="https://www.linkedin.com/in/gayatri-sawant-full-stack-developer/" target="_blank">linkedin.com/in/gayatri-sawant</a></strong></div>
+          <div class="info-row">GitHub : <strong><a href="https://github.com/sawantgayatri19" target="_blank">github.com/sawantgayatri19</a></strong></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-num">2+</div><div class="stat-line"></div><div class="stat-label">Years Experience</div></div>
+        <div class="stat-card"><div class="stat-num">6+</div><div class="stat-line"></div><div class="stat-label">Projects Shipped</div></div>
+        <div class="stat-card"><div class="stat-num">3.55</div><div class="stat-line"></div><div class="stat-label">MS GPA @ NEU</div></div>
+        <div class="stat-card"><div class="stat-num">9.85</div><div class="stat-line"></div><div class="stat-label">BS GPA (10.0 scale)</div></div>
+      </div>
+      <div class="skills-section">
+        <p class="skills-title">Technical Skills</p>
+        <div class="skills-wrap">
+          <span class="sk">Python</span><span class="sk">TypeScript</span><span class="sk">JavaScript</span>
+          <span class="sk">React.js</span><span class="sk">Next.js</span><span class="sk">Node.js</span><span class="sk">Express.js</span><span class="sk">Django</span><span class="sk">Flask</span><span class="sk">FastAPI</span>
+          <span class="sk">REST APIs</span><span class="sk">GraphQL</span><span class="sk">WebSockets</span><span class="sk">Microservices</span><span class="sk">JWT Auth</span>
+          <span class="sk">PostgreSQL</span><span class="sk">MongoDB</span><span class="sk">MySQL</span><span class="sk">Redis</span><span class="sk">DynamoDB</span>
+          <span class="sk">AWS API Gateway</span><span class="sk">AWS S3</span><span class="sk">AWS EC2</span><span class="sk">AWS Cognito</span><span class="sk">AWS Amplify</span><span class="sk">AWS SAM</span>
+          <span class="sk">Docker</span><span class="sk">Kubernetes</span><span class="sk">Terraform</span><span class="sk">GitHub Actions</span><span class="sk">CI/CD</span>
+          <span class="sk">Tailwind CSS</span><span class="sk">Bootstrap</span>
+        </div>
+      </div>
+      <div class="skills-section">
+        <p class="exp-title">Experience & Education</p>
+        <div class="timeline-grid">
+          <div style="display:flex;flex-direction:column;gap:0.8rem;">
+            <div class="titem"><div class="ticon">💼</div><div><span class="tdate">Mar–Aug 2025</span><div class="tjob">Software Developer ⬆️ Promoted</div><div class="tcomp">Zidio Development · Remote</div><div class="tstack">React, Node.js, MongoDB · 40% response time ↓</div></div></div>
+            <div class="titem"><div class="ticon">💼</div><div><span class="tdate">Dec 2024–Mar 2025</span><div class="tjob">Frontend Developer Intern</div><div class="tcomp">Zidio Development · Remote</div><div class="tstack">React.js, Tailwind CSS · 30% efficiency ↑</div></div></div>
+            <div class="titem"><div class="ticon">☁️</div><div><span class="tdate">Feb–Aug 2024</span><div class="tjob">Cloud Engineer Intern</div><div class="tcomp">I.T. Vedant · India</div><div class="tstack">AWS (VPC, EC2, RDS, DynamoDB) · 20% cost ↓</div></div></div>
+            <div class="titem"><div class="ticon">💼</div><div><span class="tdate">Mar–Nov 2023</span><div class="tjob">Full Stack Developer Intern</div><div class="tcomp">Plasmid Company · India</div><div class="tstack">HTML, CSS, JavaScript, Bootstrap, Git</div></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.8rem;">
+            <div class="titem"><div class="ticon">🎓</div><div><span class="tdate">2025–Dec 2027</span><div class="tjob">M.S. Software Engineering Systems</div><div class="tcomp">Northeastern University, Boston · GPA 3.55</div><div class="tstack">OOP, Cloud Computing, Algorithms, Web Design</div></div></div>
+            <div class="titem"><div class="ticon">🎓</div><div><span class="tdate">2022–Apr 2025</span><div class="tjob">B.S. Computer Science · 9.85 CGPA</div><div class="tcomp">B.K. Birla College, Mumbai, India</div><div class="tstack">Algorithms, OS, Data Structures</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© 2026 Gayatri Sawant<div class="footer-icons"><a href="https://github.com/sawantgayatri19" target="_blank" class="footer-icon">⌥</a><a href="https://www.linkedin.com/in/gayatri-sawant-full-stack-developer/" target="_blank" class="footer-icon">in</a><a href="mailto:sawant.g@northeastern.edu" class="footer-icon">✉</a></div></div>
+</div>
+
+<!-- PROJECTS -->
+<div id="portfolio" class="page" style="flex-direction:column;">
+  <div style="flex:1;padding:3rem 2rem;position:relative;z-index:1;">
+    <h2 class="section-title">My <span>Projects</span></h2>
+    <p class="section-sub">Production-grade apps — real traffic, real users, real impact</p>
+    <div class="proj-grid">
+      <div class="pcard" onclick="openModal(0)" style="background:linear-gradient(135deg,#1a1a2e,#0f1a4e);">
+        <div class="featured-badge">⭐ Featured</div>
+        <div class="pcard-fallback"><div class="pcard-emoji">🔗</div><div class="pcard-name">AWS URL Shortener</div></div>
+        <div class="pcard-hover"><div class="pcard-hover-title">AWS Serverless URL Shortener</div><div class="pcard-hover-tags"><span class="pcard-hover-tag">AWS</span><span class="pcard-hover-tag">DynamoDB</span><span class="pcard-hover-tag">Cognito</span><span class="pcard-hover-tag">SAM</span></div></div>
+      </div>
+      <div class="pcard" onclick="openModal(1)" style="background:linear-gradient(135deg,#1a1a3e,#0f1a4e);">
+        <div class="featured-badge">⭐ Featured</div>
+        <div class="pcard-fallback"><div class="pcard-emoji">⚡</div><div class="pcard-name">GLIMPSE Sports</div></div>
+        <div class="pcard-hover"><div class="pcard-hover-title">GLIMPSE Real-Time Sports</div><div class="pcard-hover-tags"><span class="pcard-hover-tag">React</span><span class="pcard-hover-tag">Node.js</span><span class="pcard-hover-tag">WebSockets</span><span class="pcard-hover-tag">JWT</span></div></div>
+      </div>
+      <div class="pcard" onclick="openModal(2)" style="background:linear-gradient(135deg,#2e1a0e,#3d2210);">
+        <div class="pcard-fallback"><div class="pcard-emoji">🛒</div><div class="pcard-name">TechStore E-Commerce</div></div>
+        <div class="pcard-hover"><div class="pcard-hover-title">TechStore E-Commerce</div><div class="pcard-hover-tags"><span class="pcard-hover-tag">Spring Boot</span><span class="pcard-hover-tag">PostgreSQL</span><span class="pcard-hover-tag">React</span></div></div>
+      </div>
+      <div class="pcard" onclick="openModal(3)" style="background:linear-gradient(135deg,#0e2e1a,#0f3d22);">
+        <div class="pcard-fallback"><div class="pcard-emoji">✅</div><div class="pcard-name">Task Manager</div></div>
+        <div class="pcard-hover"><div class="pcard-hover-title">Task Management System</div><div class="pcard-hover-tags"><span class="pcard-hover-tag">MERN</span><span class="pcard-hover-tag">JWT</span><span class="pcard-hover-tag">Tailwind</span></div></div>
+      </div>
+      <div class="pcard" onclick="openModal(4)" style="background:linear-gradient(135deg,#2e0e2e,#3d1040);">
+        <div class="pcard-fallback"><div class="pcard-emoji">🎨</div><div class="pcard-name">Art Gallery</div></div>
+        <div class="pcard-hover"><div class="pcard-hover-title">Modern Art Gallery</div><div class="pcard-hover-tags"><span class="pcard-hover-tag">Django</span><span class="pcard-hover-tag">Python</span><span class="pcard-hover-tag">Bootstrap</span></div></div>
+      </div>
+      <div class="pcard" onclick="openModal(5)" style="background:linear-gradient(135deg,#1a2e0e,#223d10);">
+        <div class="pcard-fallback"><div class="pcard-emoji">✈️</div><div class="pcard-name">Airline DB System</div></div>
+        <div class="pcard-hover"><div class="pcard-hover-title">Airline DB System</div><div class="pcard-hover-tags"><span class="pcard-hover-tag">MySQL</span><span class="pcard-hover-tag">SQL</span><span class="pcard-hover-tag">Indexing</span></div></div>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:0.82rem;color:var(--muted);">Click any card to view details, tech stack & links</p>
+  </div>
+  <div class="footer">© 2026 Gayatri Sawant<div class="footer-icons"><a href="https://github.com/sawantgayatri19" target="_blank" class="footer-icon">⌥</a><a href="https://www.linkedin.com/in/gayatri-sawant-full-stack-developer/" target="_blank" class="footer-icon">in</a><a href="mailto:sawant.g@northeastern.edu" class="footer-icon">✉</a></div></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="m-icon"></div>
+    <div class="modal-title" id="m-title"></div>
+    <div class="modal-subtitle" id="m-subtitle"></div>
+    <div class="modal-tags" id="m-tags"></div>
+    <div class="modal-desc" id="m-desc"></div>
+    <div class="modal-links" id="m-links"></div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div id="contact" class="page" style="flex-direction:column;">
+  <div style="flex:1;padding:3rem 2rem;position:relative;z-index:1;">
+    <h2 class="section-title">Get In <span>Touch!</span></h2>
+    <p class="section-sub">Open to co-op opportunities starting May 2026</p>
+    <div class="contact-container">
+      <div class="contact-card">
+        <p class="contact-sub">Let's connect! 🚀</p>
+        <p class="contact-desc">I'm actively seeking a co-op starting May 2026 in Full Stack, Backend, Cloud, or SWE roles. Open to Boston, Remote, or anywhere in the US. Let's build something great together!</p>
+        <div class="cinfo-row"><div class="cinfo-icon">✉</div><div><div class="cinfo-label">Email</div><div class="cinfo-val">sawant.g@northeastern.edu</div></div></div>
+        <div class="cinfo-row"><div class="cinfo-icon">📍</div><div><div class="cinfo-label">Location</div><div class="cinfo-val">Boston, MA · Open to Relocation</div></div></div>
+        <div class="cinfo-row"><div class="cinfo-icon">🎓</div><div><div class="cinfo-label">University</div><div class="cinfo-val">Northeastern University · MS Software Engineering</div></div></div>
+        <div class="social-row">
+          <a href="https://github.com/sawantgayatri19" target="_blank" class="soc-btn">⌥</a>
+          <a href="https://www.linkedin.com/in/gayatri-sawant-full-stack-developer/" target="_blank" class="soc-btn">in</a>
+          <a href="mailto:sawant.g@northeastern.edu" class="soc-btn">✉</a>
+        </div>
+        <div class="form-row">
+          <input class="form-input" placeholder="Your Name"/>
+          <input class="form-input" placeholder="Your Email"/>
+          <input class="form-input" placeholder="Subject"/>
+        </div>
+        <textarea class="form-input" placeholder="Your Message"></textarea>
+        <br/><br/>
+        <button class="btn-send">Send Message ➤</button>
+      </div>
+    </div>
+  </div>
+  <div class="footer">© 2026 Gayatri Sawant<div class="footer-icons"><a href="https://github.com/sawantgayatri19" target="_blank" class="footer-icon">⌥</a><a href="https://www.linkedin.com/in/gayatri-sawant-full-stack-developer/" target="_blank" class="footer-icon">in</a><a href="mailto:sawant.g@northeastern.edu" class="footer-icon">✉</a></div></div>
+</div>
+
+<script>
+// Particle background
+const canvas=document.getElementById('bgCanvas');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;canvas.height=window.innerHeight;
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+const particles=Array.from({length:60},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.5+0.5,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,opacity:Math.random()*0.5+0.2}));
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0)p.x=canvas.width;if(p.x>canvas.width)p.x=0;
+    if(p.y<0)p.y=canvas.height;if(p.y>canvas.height)p.y=0;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(124,58,237,${p.opacity})`;ctx.fill();
+  });
+  // Draw connecting lines
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x,dy=particles[i].y-particles[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<120){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle=`rgba(124,58,237,${0.15*(1-dist/120)})`;ctx.lineWidth=0.5;ctx.stroke();}
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+const projects=[
+  {title:"AWS Serverless URL Shortener",subtitle:"Zero Lambda Cost · Live Project ✨",tags:["AWS API Gateway","DynamoDB","Cognito","Amplify","CloudFront","Vue.js","AWS SAM","CI/CD"],desc:"Architected a fully serverless URL shortener on AWS with zero compute layer — all business logic handled directly at API Gateway, eliminating Lambda costs entirely. Configured Cognito-based JWT authentication, CloudFront CDN, and DynamoDB for sub-millisecond lookups. Deployed as infrastructure-as-code using AWS SAM with CI/CD via Amplify.",github:"https://github.com/sawantgayatri19/url-shortener-aws",live:"https://master.d379yxg4f0t2fp.amplifyapp.com/",icon:"🔗"},
+  {title:"GLIMPSE — Real-Time Sports Platform",subtitle:"10+ Live Matches Daily · WebSockets · JWT",tags:["React.js","Node.js","MongoDB","REST APIs","WebSockets","JWT","RBAC"],desc:"Built a full-stack application delivering real-time sports data and AI-generated match commentary for 10+ live matches daily, reducing manual reporting time by 60%. Features role-based access control, JWT authentication, and WebSocket connections. Uses MongoDB aggregation pipelines for efficient data retrieval.",github:"https://github.com/sawantgayatri19/GLIMPSE",live:null,icon:"⚡"},
+  {title:"TechStore — E-Commerce Platform",subtitle:"Spring Boot Microservices · OOP & SOLID",tags:["Java","Spring Boot","PostgreSQL","React.js","Maven","Microservices"],desc:"Engineered a two-tier e-commerce platform with Spring Boot microservices applying OOP and SOLID design principles. Built RESTful APIs for product browsing, cart management, and end-to-end checkout with PostgreSQL.",github:"https://github.com/CSYE6200-OOD-Fall-2025-S3/final-project-final-project-team-5",live:null,icon:"🛒"},
+  {title:"Task Management System",subtitle:"50+ Concurrent Users · Drag & Drop Kanban",tags:["React.js","Node.js","Express.js","MongoDB","JWT","Tailwind CSS"],desc:"Production-grade task management app with JWT auth, real-time progress tracking, and drag-and-drop kanban board serving 50+ concurrent users. Features role-based access and responsive design.",github:"https://github.com/sawantgayatri19/Zidio-Task-Management",live:null,icon:"✅"},
+  {title:"Modern Art Gallery",subtitle:"Responsive Digital Gallery · Django",tags:["Python","Django","Bootstrap","HTML/CSS","Responsive"],desc:"A fully responsive digital art gallery built with Django and Bootstrap. Features dynamic content loading, mobile-first design, and optimized backend queries for fast page performance.",github:null,live:null,icon:"🎨"},
+  {title:"Airline Database Management System",subtitle:"Optimized Relational DB · MySQL",tags:["MySQL","SQL","ER Modeling","Indexing","Normalization","Stored Procedures"],desc:"Designed and implemented an Airline DBMS using MySQL to manage flight schedules, bookings, and customer data. Applied indexing and normalization techniques to enhance query performance and ensure data integrity.",github:null,live:null,icon:"✈️"}
+];
+
+function showPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.snbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+}
+function openModal(i){
+  const p=projects[i];
+  document.getElementById('m-icon').textContent=p.icon;
+  document.getElementById('m-title').textContent=p.title;
+  document.getElementById('m-subtitle').textContent=p.subtitle;
+  document.getElementById('m-desc').textContent=p.desc;
+  document.getElementById('m-tags').innerHTML=p.tags.map(t=>`<span class="modal-tag">${t}</span>`).join('');
+  let l='';
+  if(p.github)l+=`<a href="${p.github}" target="_blank" class="modal-link">⌥ GitHub</a>`;
+  if(p.live)l+=`<a href="${p.live}" target="_blank" class="modal-link">🌐 Live Demo</a>`;
+
+  document.getElementById('m-links').innerHTML=l;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+</script>
+</body>
+</html>
